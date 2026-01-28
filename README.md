@@ -1,7 +1,9 @@
 # microservices-shop
 
-Создание микросервиса для теста
+# Catalog Service
 
-Изучаю Git и VS Code
+This service manages product information.
 
-Разбираюсь с переносом строк
+## How to Start
+
+Follow the steps described in `instructions.txt`.
