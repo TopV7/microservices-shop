@@ -51,3 +51,15 @@ jobs:
             echo "ОШИБКА: В сервисе заказов нет данных или формат неверный!"
             exit 1
           fi
+
+          # 4. ПРОВЕРКА СВЯЗИ (Inter-service check)
+          echo "Проверка связи между сервисами..."
+          RESPONSE_CHECK=$(curl -s http://127.0.0.1:5001/check_item/Microservice)
+          echo "Ответ проверки связи: $RESPONSE_CHECK"
+
+          if [[ "$RESPONSE_CHECK" == *"найден"* ]]; then
+            echo "Inter-service Communication: OK!"
+          else
+            echo "ОШИБКА: Сервис заказов не смог достучаться до каталога или не нашел товар!"
+            exit 1
+          fi
