@@ -19,7 +19,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r catalog-service/requirements.txt
 
-      - name: Run server and test # Пробный запуск: проверяем, что сервер хотя бы запускается без ошибок
+      - name: Run server and test
         run: |
           cd catalog-service
-          python server.py & sleep 5 && curl http://127.0.0.1:5000/products
+          python server.py & 
+          sleep 5
+          # 1. Сохраняем ответ сервера в переменную
+          RESPONSE=$(curl -s http://127.0.0.1:5000/products)
+          echo "Полученный ответ от сервера: $RESPONSE"
+
+          # 2. Проверяем, есть ли в ответе слово "Microservice"
+          if [[ "$RESPONSE" == *"Microservice"* ]]; then
+            echo "Тест прошел: Товар найден в списке!"
+          else
+            echo "ОШИБКА: Товар не найден или список пуст!"
+            exit 1  # Эта команда покрасит билд в красный цвет
+          fi
