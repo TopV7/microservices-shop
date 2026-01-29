@@ -2,6 +2,7 @@ import requests
 from flask import Flask, jsonify
 
 app = Flask(__name__)
+app.json.ensure_ascii = False
 
 # Простой список заказов (имитация базы данных)
 orders = [
