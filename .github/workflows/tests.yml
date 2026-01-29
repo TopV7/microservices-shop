@@ -18,20 +18,36 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r catalog-service/requirements.txt
+          pip install -r order-service/requirements.txt
 
-      - name: Run server and test
+      - name: Run servers and test
         run: |
-          cd catalog-service
-          python server.py & 
-          sleep 5
-          # 1. Сохраняем ответ сервера в переменную
-          RESPONSE=$(curl -s http://127.0.0.1:5000/products)
-          echo "Полученный ответ от сервера: $RESPONSE"
+          # 1. Запускаем оба сервера из корня
+          python catalog-service/server.py & 
+          python order-service/order_server.py & 
 
-          # 2. Проверяем, есть ли в ответе слово "Microservice"
-          if [[ "$RESPONSE" == *"Microservice"* ]]; then
-            echo "Тест прошел: Товар найден в списке!"
+          sleep 5
+
+          # 2. ПРОВЕРКА КАТАЛОГА
+          echo "Проверка Catalog Service..."
+          RESPONSE_CAT=$(curl -s http://127.0.0.1:5000/products)
+          echo "Ответ каталога: $RESPONSE_CAT"
+
+          if [[ "$RESPONSE_CAT" == *"Microservice"* ]]; then
+            echo "Catalog Test: OK!"
           else
-            echo "ОШИБКА: Товар не найден или список пуст!"
-            exit 1  # Эта команда покрасит билд в красный цвет
+            echo "ОШИБКА: Товар 'Microservice' не найден в каталоге!"
+            exit 1
+          fi
+
+          # 3. ПРОВЕРКА ЗАКАЗОВ
+          echo "Проверка Order Service..."
+          RESPONSE_ORD=$(curl -s http://127.0.0.1:5001/orders)
+          echo "Ответ заказов: $RESPONSE_ORD"
+
+          if [[ "$RESPONSE_ORD" == *"order_id"* ]]; then
+            echo "Order Test: OK!"
+          else
+            echo "ОШИБКА: В сервисе заказов нет данных или формат неверный!"
+            exit 1
           fi
