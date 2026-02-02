@@ -13,7 +13,7 @@ def get_products():  # Создаем функцию — список дейст
     products = []  # Создаем пустую корзину (список), куда будем складывать товары
 
     # Открываем наш файл с товарами, "r" — для чтения, utf-8 — чтобы видеть русские буквы
-    with open("catalog-service/products.txt", "r", encoding="utf-8") as file:
+    with open("products.txt", "r", encoding="utf-8") as file:
         for line in file:  # Берем файл и читаем его по одной строчке
             products.append(
                 line.strip()
