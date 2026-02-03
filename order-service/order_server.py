@@ -19,7 +19,7 @@ def get_orders():
 @app.route("/check_item/<name>")
 def check_item(name):
     # 1. Спрашиваем список товаров у первого сервиса (порт 5000)
-    response = requests.get("http://127.0.0.1:5000/products")
+    response = requests.get("http://catalog-service:5000/products")
 
     # 2. Превращаем ответ из JSON в обычный список Python
     catalog = response.json()
