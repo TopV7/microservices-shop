@@ -2,8 +2,10 @@ import psycopg2
 from flask import Flask, jsonify
 import os
 import time
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config['JSON_AS_ASCII'] = False
 
 def get_db_connection():

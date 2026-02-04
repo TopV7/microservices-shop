@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Microshop Frontend</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        h1 {
+            color: #1c1e21;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .product-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .product-item {
+            background: #e7f3ff;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 8px;
+            color: #0e81f6;
+            font-weight: bold;
+            border: 1px solid #cfe9ff;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>📦 Каталог товаров</h1>
+        <ul id="products" class="product-list">
+            <li>Загрузка...</li>
+        </ul>
+    </div>
+
+    <script>
+        async function fetchProducts() {
+            try {
+                // Делаем запрос к нашему бэкенду (порт 5000)
+                const response = await fetch('http://localhost:5000/products');
+                if (!response.ok) throw new Error('Ошибка сети');
+
+                const data = await response.json();
+                const listElement = document.getElementById('products');
+                listElement.innerHTML = ''; // Очищаем текст загрузки
+
+                // Создаем элементы списка для каждого товара
+                data.forEach(product => {
+                    const li = document.createElement('li');
+                    li.className = 'product-item';
+                    li.textContent = product;
+                    listElement.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('products').innerHTML = `<li class="error">Не удалось загрузить товары: ${error.message}</li>`;
+            }
+        }
+
+        // Запускаем функцию при загрузке страницы
+        fetchProducts();
+    </script>
+</body>
+
+</html>
