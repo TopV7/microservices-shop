@@ -1,5 +1,5 @@
 import psycopg2
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import os
 import time
 from flask_cors import CORS
@@ -67,6 +67,23 @@ def get_products():
     
     # ВАЖНО: отдаем JSON список
     return jsonify(products_list)
+
+@app.route('/products', methods=['POST'])
+def add_product():
+    data = request.get_json()
+    name = data.get('name')
+    if not name:
+        return {"error": "Name is required"}, 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('INSERT INTO products (name) VALUES (%s) RETURNING id;', (name,))
+    new_id = cur.fetchone()[0]
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {"id": new_id, "name": name, "status": "added"}, 201
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

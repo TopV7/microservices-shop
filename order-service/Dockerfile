@@ -11,6 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 4. Копируем всё остальное из папки order-service в контейнер
 COPY . .
 
-EXPOSE 5001
+RUN ls -la
 # 5. Команда, которая запустит твой сервер при старте контейнера
 CMD ["python", "order_server.py"]
