@@ -2,46 +2,39 @@ import requests
 from flask import Flask, jsonify
 
 app = Flask(__name__)
-app.json.ensure_ascii = False
+app.config['JSON_AS_ASCII'] = False
 
-# Простой список заказов (имитация базы данных)
-orders = [
-    {"order_id": 1, "product_name": "Microservice Course", "status": "shipped"},
-    {"order_id": 2, "product_name": "Python Book", "status": "pending"},
-]
-
-
-@app.route("/orders", methods=["GET"])
-def get_orders():
-    return jsonify(orders)
-
+@app.route("/")
+def index():
+    return "Order Service работает!"
 
 @app.route("/check_item/<name>")
 def check_item(name):
-    # 1. Спрашиваем список товаров у первого сервиса (порт 5000)
-    response = requests.get("http://catalog-service:5000/products")
+    try:
+        # Запрашиваем данные у каталога
+        response = requests.get("http://catalog-service:5000/products", timeout=5)
+        
+        if response.status_code != 200:
+            return jsonify({"message": "Каталог недоступен"}), 503
 
-    # 2. Превращаем ответ из JSON в обычный список Python
-    catalog = response.json()
+        # Получаем список из JSON
+        catalog = response.json()
+        
+        # Ищем товар
+        found = False
+        for item in catalog:
+            if name.lower() == item.lower():
+                found = True
+                break
 
-    # 3. Проверяем, есть ли наше имя в этом списке
-    # 3. Ищем, встречается ли наше слово внутри любой строки каталога
-    found = False
-    for item in catalog:
-        # Проверяем вхождение и приводим всё к маленьким буквам для надежности
-        if name.lower() in item.lower():
-            found = True
-            break
+        if found:
+            # Слово 'found' нужно для нашего теста в GitHub!
+            return jsonify({"message": f"found: Товар '{name}' найден!"})
+        else:
+            return jsonify({"message": f"not found: Товар '{name}' не найден"}), 404
 
-    if found:
-        return jsonify({"message": f"Да, товар '{name}' найден в каталоге!"})
-    else:
-        return (
-            jsonify({"message": f"Нет, товара '{name}' в каталоге не существует"}),
-            404,
-        )
-
+    except Exception as e:
+        return jsonify({"message": f"Ошибка связи: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    # Запускаем на порту 5001, чтобы не конфликтовать с первым сервисом (он на 5000)
     app.run(host="0.0.0.0", port=5001)
