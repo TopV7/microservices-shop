@@ -13,7 +13,7 @@ jobs:
       - name: Build and Start Containers
         run: |
           # 1. Запускаем Docker Compose. Он сам соберет образы и расставит файлы.
-          docker-compose up -d --build
+          docker compose up -d --build
 
       - name: Wait for services
         run: |
@@ -44,4 +44,4 @@ jobs:
 
       - name: Stop and Cleanup
         if: always()
-        run: docker-compose down
+        run: docker compose down
