@@ -1,12 +1,33 @@
 version: '3.8'
 
 services:
+  # Наш новый сервис - База Данных
+  db:
+    image: postgres:15 # Берем готовый официальный образ
+    restart: always # Если упадет - поднимется сам
+    environment:
+      POSTGRES_USER: user # Имя «админа» базы
+      POSTGRES_PASSWORD: password # Пароль
+      POSTGRES_DB: shop_db # Название нашей базы данных
+    ports:
+      - "5432:5432" # Стандартный порт Postgres
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   catalog-service:
     build: ./catalog-service
     ports:
       - "5000:5000"
+    depends_on:
+      - db # Говорим: "Не запускай каталог, пока база не готова"
 
   order-service:
     build: ./order-service
     ports:
       - "5001:5001"
+    depends_on:
+      - catalog-service
+
+volumes:
+  postgres_data:

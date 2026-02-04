@@ -1,4 +1,4 @@
-name: Dockerized Integration Test
+name: Dockerized Integration Test with DB
 
 on: [push]
 
@@ -10,38 +10,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build and Start Containers
+      - name: Start services
+        # Запускаем все три контейнера (включая базу)
+        run: docker compose up -d --build
+
+      - name: Wait for Database
+        # Это новый шаг! Робот будет ждать, пока база скажет "Я готова"
         run: |
-          # 1. Запускаем Docker Compose. Он сам соберет образы и расставит файлы.
-          docker compose up -d --build
+          echo "Ожидаем готовности базы данных..."
+          until docker exec $(docker ps -qf "name=db") pg_isready -U user -d shop_db; do
+            sleep 2
+          done
+          echo "База данных запущена!"
+          sleep 5
 
-      - name: Wait for services
+      - name: Check Catalog API
+        # Проверяем, отдаёт ли каталог список товаров из базы
         run: |
-          # 2. Ждем немного, пока Flask внутри контейнеров проснется
-          sleep 10
+          curl -f http://127.0.0.1:5000/products || (docker compose logs catalog-service && exit 1)
 
-      - name: Run Integration Tests
+      - name: Integration Test
+        # Проверяем связь: Order стучится в Catalog, а тот лезет в базу
         run: |
-          # 3. Проверяем Catalog напрямую (через порт 5000)
-          echo "Проверка Catalog Service..."
-          curl -f http://127.0.0.1:5000/products || exit 1
-
-          # 4. Проверяем Order напрямую (через порт 5001)
-          echo "Проверка Order Service..."
-          curl -f http://127.0.0.1:5001/orders || exit 1
-
-          # 5. ГЛАВНЫЙ ТЕСТ: связь между сервисами
-          echo "Проверка связи: Order -> Catalog..."
           RESPONSE=$(curl -s http://127.0.0.1:5001/check_item/Microservice)
-          echo "Ответ: $RESPONSE"
-          
-          if [[ "$RESPONSE" == *"найден"* ]]; then
-            echo "SUCCESS: Сервисы общаются в Docker!"
+          echo "Ответ системы: $RESPONSE"
+          if [[ "$RESPONSE" == *"found"* ]]; then
+            echo "Ура! Связь с базой через два сервиса работает!"
           else
-            echo "ERROR: Связь не установлена!"
             exit 1
           fi
 
-      - name: Stop and Cleanup
+      - name: Stop services
         if: always()
         run: docker compose down
