@@ -29,14 +29,17 @@ jobs:
         run: |
           curl -f http://127.0.0.1:5000/products || (docker compose logs catalog-service && exit 1)
 
-      - name: Integration Test
-        # Проверяем связь: Order стучится в Catalog, а тот лезет в базу
+      - name: Тестируем создание заказа (Order Service)
         run: |
-          RESPONSE=$(curl -s http://127.0.0.1:5001/check_item/Microservice)
+          RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" \
+            -d '{"product_name": "Microservice"}' \
+            http://127.0.0.1:5001/orders)
           echo "Ответ системы: $RESPONSE"
-          if [[ "$RESPONSE" == *"found"* ]]; then
-            echo "Ура! Связь с базой через два сервиса работает!"
+          # Проверяем, есть ли в ответе слово success
+          if [[ $RESPONSE == *"success"* ]]; then
+            echo "Заказ успешно создан в базе!"
           else
+            echo "Ошибка: Заказ не создался!"
             exit 1
           fi
 
