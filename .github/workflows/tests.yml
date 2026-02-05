@@ -29,6 +29,9 @@ jobs:
         run: |
           curl -f http://127.0.0.1:5000/products || (docker compose logs catalog-service && exit 1)
 
+      - name: Wait for services to be ready
+        run: sleep 10
+
       - name: Тестируем создание заказа (Order Service)
         run: |
           RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" \
