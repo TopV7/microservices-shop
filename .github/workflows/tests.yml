@@ -36,13 +36,15 @@ jobs:
         run: |
           RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" \
             -d '{"product_name": "Microservice"}' \
-            http://127.0.0.1:5001/orders)
+            http://127.0.0.1:5001/orders) || (docker compose logs order-service && exit 1)
+          
           echo "Ответ системы: $RESPONSE"
-          # Проверяем, есть ли в ответе слово success
+          
           if [[ $RESPONSE == *"success"* ]]; then
             echo "Заказ успешно создан в базе!"
           else
-            echo "Ошибка: Заказ не создался!"
+            echo "Ошибка: Заказ не создался! Логи сервиса:"
+            docker compose logs order-service
             exit 1
           fi
 
