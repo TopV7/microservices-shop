@@ -24,8 +24,7 @@ def init_db():
         conn.close()
         print("Таблица заказов готова!")
 
-# Не забудь вызвать её перед стартом
-init_db()
+
 
 
 def get_db_connection():
@@ -99,6 +98,11 @@ def create_order():
 def index():
     return "Order Service работает!"
 
+# Не забудь вызвать её перед стартом
+
+
 if __name__ == "__main__":
+
+    init_db()
     # Запускаем строго на порту 5001
     app.run(host="0.0.0.0", port=5001)
