@@ -8,6 +8,8 @@ app = Flask(__name__)
 CORS(app)
 app.config['JSON_AS_ASCII'] = False
 
+
+
 def get_db_connection():
     # Пробуем подключиться несколько раз, если база еще не загрузилась
     for i in range(10):
