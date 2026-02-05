@@ -7,6 +7,27 @@ import time
 app = Flask(__name__)
 CORS(app)
 
+def init_db():
+    conn = get_db_connection()
+    if conn:
+        cur = conn.cursor()
+        # ВАЖНО: здесь мы создаем таблицу именно для ЗАКАЗОВ
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS orders (
+                id SERIAL PRIMARY KEY,
+                product_name VARCHAR(100) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        ''')
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Таблица заказов готова!")
+
+# Не забудь вызвать её перед стартом
+init_db()
+
+
 def get_db_connection():
     for i in range(10):
         try:
