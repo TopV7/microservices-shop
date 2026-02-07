@@ -6,9 +6,9 @@ services:
     image: postgres:15 # Берем готовый официальный образ
     restart: always # Если упадет - поднимется сам
     environment:
-      POSTGRES_USER: user # Имя «админа» базы
-      POSTGRES_PASSWORD: password # Пароль
-      POSTGRES_DB: shop_db # Название нашей базы данных
+      POSTGRES_USER: ${POSTGRES_USER} # Имя «админа» базы
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Пароль
+      POSTGRES_DB: ${POSTGRES_DB} # Название нашей базы данных
     ports:
       - "5432:5432" # Стандартный порт Postgres
 

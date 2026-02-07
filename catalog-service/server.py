@@ -1,3 +1,4 @@
+import os
 import psycopg2
 from flask import Flask, jsonify, request
 import os
@@ -11,14 +12,20 @@ app.config['JSON_AS_ASCII'] = False
 
 
 def get_db_connection():
+    # Используем os.getenv(имя_переменной, значение_по_умолчанию)
+    db_host = os.getenv('DB_HOST', 'db')
+    db_name = os.getenv('DB_NAME', 'shop_db')
+    db_user = os.getenv('DB_USER', 'user')
+    db_password = os.getenv('DB_PASSWORD', 'password')
+
     # Пробуем подключиться несколько раз, если база еще не загрузилась
     for i in range(10):
         try:
             conn = psycopg2.connect(
-                host="db",
-                database="shop_db",
-                user="user",
-                password="password"
+                host=db_host,
+                database=db_name,
+                user=db_user,
+                password=db_password
             )
             return conn
         except Exception as e:

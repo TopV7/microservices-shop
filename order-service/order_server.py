@@ -1,3 +1,4 @@
+import os
 import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -28,13 +29,20 @@ def init_db():
 
 
 def get_db_connection():
+
+    # Мы говорим: "Возьми значение из системы, а если его там нет — используй то, что после запятой"
+    db_host = os.getenv('DB_HOST', 'db')
+    db_name = os.getenv('DB_NAME', 'shop_db')
+    db_user = os.getenv('DB_USER', 'user')
+    db_password = os.getenv('DB_PASSWORD', 'password')
+
     for i in range(10):
         try:
             conn = psycopg2.connect(
-                host="db",
-                database="shop_db",
-                user="user",
-                password="password"
+                host=db_host,
+                database=db_name,
+                user=db_user,
+                password=db_password
             )
             return conn
         except Exception as e:
