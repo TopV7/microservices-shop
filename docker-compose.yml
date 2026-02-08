@@ -15,7 +15,7 @@ services:
 
   catalog-service:
     build: ./catalog-service
-    env_file: .env
+    ## env_file: .env
     ports:
       - "5000:5000"
     environment:
@@ -26,7 +26,7 @@ services:
 
   order-service:
     build: ./order-service
-    env_file: .env
+    ## env_file: .env
     ports:
       - "5001:5001"
     environment:
