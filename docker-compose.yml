@@ -3,6 +3,8 @@ services:
   db:
     image: postgres:15 # Берем готовый официальный образ
     restart: always # Если упадет - поднимется сам
+    env_file:
+      - .env # Теперь база точно знает, где искать эти переменные
     environment:
       POSTGRES_USER: ${POSTGRES_USER} # Имя «админа» базы
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Пароль
@@ -15,7 +17,8 @@ services:
 
   catalog-service:
     build: ./catalog-service
-    # env_file: .env
+    env_file:
+      - .env # Теперь сервис точно знает, где искать эти переменные
     ports:
       - "5000:5000"
     environment:
@@ -26,7 +29,8 @@ services:
 
   order-service:
     build: ./order-service
-    # env_file: .env
+    env_file:
+      - .env # Теперь сервис точно знает, где искать эти переменные
     ports:
       - "5001:5001"
     environment:
