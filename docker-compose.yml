@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Наш новый сервис - База Данных
   db:
@@ -17,15 +15,23 @@ services:
 
   catalog-service:
     build: ./catalog-service
+    env_file: .env
     ports:
       - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: ${DB_PASSWORD} # Теперь он точно возьмет это из .env
     depends_on:
       - db # Говорим: "Не запускай каталог, пока база не готова"
 
   order-service:
     build: ./order-service
+    env_file: .env
     ports:
       - "5001:5001"
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: ${DB_PASSWORD} # Теперь он точно возьмет это из .env
     depends_on:
       - catalog-service
 

@@ -27,6 +27,9 @@ jobs:
       - name: Check Catalog API
         # Проверяем, отдаёт ли каталог список товаров из базы
         run: |
+          sleep 5
+          docker compose ps
+          docker compose logs catalog-service
           curl -f http://127.0.0.1:5000/products || (docker compose logs catalog-service && exit 1)
 
       - name: Wait for services to be ready
