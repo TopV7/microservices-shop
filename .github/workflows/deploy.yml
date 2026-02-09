@@ -19,7 +19,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "docker-compose.yml"
-          target: "~/microservices-shop"
+          target: "/root/microservices-shop"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.10 # Робот запускает команды на сервере
