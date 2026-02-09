@@ -1,12 +1,17 @@
 name: Build and Deploy to Server
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Dockerized Integration Test with DB"] # Должно совпадать с name в tests.yml
+    types:
+      - completed
     branches:
-      - main  # Срабатывает только при пуше в главную ветку
+      - main
 
 jobs:
   build-and-push:
+    # Запускаем только если тесты прошли успешно
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -40,7 +45,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/order-service:latest
 
   deploy:
-    needs: build-and-push # Важно: деплой начнется только после успешной сборки
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -65,4 +70,4 @@ jobs:
             cd ~/microservices-shop
             docker compose pull
             docker compose up -d
-            docker image prune -f # Удаляет старые версии образов, чтобы не забивать диск
+            docker image prune -f
