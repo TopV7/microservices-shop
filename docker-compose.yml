@@ -16,7 +16,7 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
 
   catalog-service:
-    build: ./catalog-service
+    image: topv7/catalog-service:latest
     env_file:
       - .env # Теперь сервис точно знает, где искать эти переменные
     ports:
@@ -28,7 +28,7 @@ services:
       - db # Говорим: "Не запускай каталог, пока база не готова"
 
   order-service:
-    build: ./order-service
+    image: topv7/order-service:latest
     env_file:
       - .env # Теперь сервис точно знает, где искать эти переменные
     ports:
@@ -40,7 +40,7 @@ services:
       - catalog-service
 
   frontend:
-    build: ./frontend
+    image: topv7/frontend:latest
     ports:
       - "80:80"
     depends_on:
