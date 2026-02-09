@@ -1,19 +1,53 @@
-name: Deploy to Server
+name: Build and Deploy to Server
 
 on:
   push:
     branches:
-      - main
+      - main  # Срабатывает только при пуше в главную ветку
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Робот берет твой код из GitHub
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+      - name: Build and Push Catalog Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./catalog-service
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/catalog-service:latest
+
+      - name: Build and Push Order Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./order-service
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/order-service:latest
+
+  deploy:
+    needs: build-and-push # Важно: деплой начнется только после успешной сборки
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Copy docker-compose.yml to server
-        uses: appleboy/scp-action@v0.1.4  # Робот копирует файл на сервер
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
@@ -22,7 +56,7 @@ jobs:
           target: "/root/microservices-shop"
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.10 # Робот запускает команды на сервере
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
@@ -31,3 +65,4 @@ jobs:
             cd ~/microservices-shop
             docker compose pull
             docker compose up -d
+            docker image prune -f # Удаляет старые версии образов, чтобы не забивать диск
