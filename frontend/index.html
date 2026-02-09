@@ -1,88 +1,152 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <title>Микросервисный Магазин</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 400px; }
-        h1 { color: #333; text-align: center; font-size: 24px; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
-        button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 6px; transition: 0.3s; }
-        .btn-add { background: #007bff; color: white; }
-        .btn-buy { background: #28a745; color: white; font-size: 12px; }
-        button:hover { opacity: 0.8; }
-        ul { list-style: none; padding: 0; }
-        li { 
-            background: #eef6ff; margin-bottom: 8px; padding: 12px; 
-            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
-            color: #0056b3; font-weight: bold;
+        body {
+            font-family: sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 50px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .btn-add {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-buy {
+            background: #28a745;
+            color: white;
+            font-size: 12px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #eef6ff;
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #0056b3;
+            font-weight: bold;
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>📦 Каталог товаров</h1>
-    
-    <div class="input-group">
-        <input type="text" id="productName" placeholder="Название товара...">
-        <button class="btn-add" onclick="addProduct()">Добавить</button>
+    <div class="container">
+        <h1>📦 Каталог товаров Проверка!!!</h1>
+
+        <div class="input-group">
+            <input type="text" id="productName" placeholder="Название товара...">
+            <button class="btn-add" onclick="addProduct()">Добавить</button>
+        </div>
+
+        <ul id="products">
+            <li>Загрузка...</li>
+        </ul>
     </div>
 
-    <ul id="products"><li>Загрузка...</li></ul>
-</div>
+    <script>
+        // 1. Загрузка списка товаров
+        async function fetchProducts() {
+            const response = await fetch('/api/products');
+            const products = await response.json();
+            const listElement = document.getElementById('products');
+            listElement.innerHTML = '';
 
-<script>
-    // 1. Загрузка списка товаров
-    async function fetchProducts() {
-        const response = await fetch('/api/products');
-        const products = await response.json();
-        const listElement = document.getElementById('products');
-        listElement.innerHTML = '';
-        
-        products.forEach(name => {
-            const li = document.createElement('li');
-            li.innerHTML = `
+            products.forEach(name => {
+                const li = document.createElement('li');
+                li.innerHTML = `
                 <span>${name}</span>
                 <button class="btn-buy" onclick="buyProduct('${name}')">Купить</button>
             `;
-            listElement.appendChild(li);
-        });
-    }
+                listElement.appendChild(li);
+            });
+        }
 
-    // 2. Добавление товара
-    async function addProduct() {
-        const input = document.getElementById('productName');
-        const name = input.value;
-        if (!name) return;
+        // 2. Добавление товара
+        async function addProduct() {
+            const input = document.getElementById('productName');
+            const name = input.value;
+            if (!name) return;
 
-        await fetch('/api/products', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name })
-        });
-        input.value = '';
-        fetchProducts();
-    }
-
-    // 3. Покупка товара (запрос в Order Service)
-    async function buyProduct(name) {
-        try {
-            const response = await fetch('/api/orders', {
+            await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ product_name: name })
+                body: JSON.stringify({ name: name })
             });
-            const result = await response.json();
-            alert(result.message || result.status);
-        } catch (e) {
-            alert("Ошибка при заказе");
+            input.value = '';
+            fetchProducts();
         }
-    }
 
-    fetchProducts();
-</script>
+        // 3. Покупка товара (запрос в Order Service)
+        async function buyProduct(name) {
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_name: name })
+                });
+                const result = await response.json();
+                alert(result.message || result.status);
+            } catch (e) {
+                alert("Ошибка при заказе");
+            }
+        }
+
+        fetchProducts();
+    </script>
 </body>
+
 </html>
